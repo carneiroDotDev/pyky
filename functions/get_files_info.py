@@ -1,4 +1,3 @@
-
 def print_file_info(directory_path):
     """
     Prints information (file size, whether it's a directory) for each
@@ -114,3 +113,76 @@ def get_file_content(working_dir, file_path):
         content = file.read(MAX_CHARS)    
         print(f"Content of '{file_path}':\n{content}")
         return content
+    
+def write_file(working_dir, file_path, content):
+    """
+    Write content to a file in the specified directory.
+
+    Args:
+        working_dir (str): The directory to write the file in.
+        file_path (str): The path to the file within the working directory.
+        content (str): The content to write to the file.
+
+    Returns:
+        str: A message indicating success or failure.
+    """
+    import os
+
+    abs_working_directory = os.path.abspath(working_dir)
+    full_file_path = os.path.join(abs_working_directory, file_path)
+
+    if not os.path.commonpath([abs_working_directory, full_file_path]) == abs_working_directory:
+        print(f'Error: Cannot write "{file_path}" as it is outside the permitted working directory')
+        return f'Error: Cannot write "{file_path}" as it is outside the permitted working directory'
+    
+    if not os.path.exists(abs_working_directory):
+        os.makedirs(abs_working_directory)
+        
+    try:
+        with open(full_file_path, 'w') as file:
+            file.write(content)
+        print( f'Successfully wrote to "{file_path}" ({len(content)} characters written)')
+        return f'Successfully wrote to "{file_path}" ({len(content)} characters written)'
+    except Exception as e:
+        return f"Error writing to file '{file_path}': {e}"
+
+def run_python_file(working_dir, file_path):
+    """
+    Run a Python file in the specified directory.
+
+    Args:
+        working_dir (str): The directory to run the Python file in.
+        file_path (str): The path to the Python file within the working directory.
+
+    Returns:
+        str: The output of the Python file execution.
+    """
+    import os
+    import subprocess
+
+    abs_working_directory = os.path.abspath(working_dir)
+    full_file_path = os.path.join(abs_working_directory, file_path)
+
+    # Restrict to files directly inside working_dir (not subdirectories)
+    if os.path.dirname(os.path.abspath(full_file_path)) != abs_working_directory:
+        print(f'Error: Cannot execute "{file_path}" as it is outside the permitted working directory')
+        return f'Error: Cannot execute "{file_path}" as it is outside the permitted working directory'
+
+    if not os.path.exists(full_file_path):
+        print(f'Error: File "{file_path}" not found.')
+        return 'Error: File "{file_path}" not found.'
+    
+    if not full_file_path.endswith('.py'):
+        print(f'Error: "{file_path}" is not a Python file')
+        return f'Error: "{file_path}" is not a Python file'
+
+    try:
+        result = subprocess.run(['python', full_file_path], capture_output=True, text=True, check=True)
+        print(f"STDOUT: of '{file_path}':\n{result.stdout}")
+        if result.returncode != 0:
+           print(f"Process exited with code {result.returncode}")
+        return result.stdout
+    except subprocess.CalledProcessError as e:
+        print(f"STDERR: Error running '{file_path}': {e.stderr}")
+        print(f"Error: executing Python file: {e}")
+        return f"Error running '{file_path}': {e.stderr}"
