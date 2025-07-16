@@ -5,8 +5,11 @@ def print_file_info(directory_path):
     Handles potential errors by re-raising a custom error.
     """
     import os
+
     if not os.path.exists(directory_path):
-        raise FileNotFoundError(f"Error: The directory '{directory_path}' does not exist.")
+        raise FileNotFoundError(
+            f"Error: The directory '{directory_path}' does not exist."
+        )
     try:
         # Get a list of all entries (files and directories) in the specified path
         for entry_name in os.listdir(directory_path):
@@ -14,7 +17,9 @@ def print_file_info(directory_path):
             full_path = os.path.join(directory_path, entry_name)
 
             is_directory = os.path.isdir(full_path)
-            file_size = 0 # Default size for directories or if an error occurs getting size
+            file_size = (
+                0  # Default size for directories or if an error occurs getting size
+            )
 
             # Get file size only if it's not a directory
             if not is_directory:
@@ -23,7 +28,7 @@ def print_file_info(directory_path):
                 except OSError as e:
                     # Handle cases where file size cannot be retrieved (e.g., permission issues)
                     print(f"Warning: Could not get size for {full_path}: {e}")
-                    file_size = -1 # Indicate an error in getting size
+                    file_size = -1  # Indicate an error in getting size
 
             # Print the formatted string
             print(f"- {entry_name}: file_size={file_size} bytes, is_dir={is_directory}")
@@ -34,6 +39,7 @@ def print_file_info(directory_path):
     except Exception as e:
         # Catch any other unexpected errors
         raise Exception(f"Error: An unexpected error occurred. {e}")
+
 
 def get_files_info(working_dir, dir=None):
     """
@@ -66,7 +72,9 @@ def get_files_info(working_dir, dir=None):
     # We check if the common path between the working directory and the full path
     # is the working directory itself.
     if os.path.commonpath([abs_working_directory, full_path]) != abs_working_directory:
-        print(f"Error: Cannot list '{dir}' as it is outside the permitted working directory")
+        print(
+            f"Error: Cannot list '{dir}' as it is outside the permitted working directory"
+        )
         return f"Error: Cannot list '{dir}' as it is outside the permitted working directory"
 
     # 3. Ensure the directory exists
@@ -75,10 +83,12 @@ def get_files_info(working_dir, dir=None):
         return f"Error: '{dir}' is not a directory"
 
     print_file_info(os.path.join(abs_working_directory, dir))
-    
+
     return files_info
 
-get_files_info("calculator", ".")
+
+# get_files_info("calculator", ".")
+
 
 def get_file_content(working_dir, file_path):
     """
@@ -97,23 +107,29 @@ def get_file_content(working_dir, file_path):
     abs_working_directory = os.path.abspath(working_dir)
     full_file_path = os.path.join(abs_working_directory, file_path)
 
-    if not os.path.commonpath([abs_working_directory, full_file_path]) == abs_working_directory:
-        print(f'Error: Cannot read "{file_path}" as it is outside the permitted working directory')
+    if (
+        not os.path.commonpath([abs_working_directory, full_file_path])
+        == abs_working_directory
+    ):
+        print(
+            f'Error: Cannot read "{file_path}" as it is outside the permitted working directory'
+        )
         return f'Error: Cannot read "{file_path}" as it is outside the permitted working directory'
 
     if not os.path.exists(full_file_path):
         print(f"Error: File '{file_path}' does not exist in '{working_dir}'")
         return f"Error: File '{file_path}' does not exist in '{working_dir}'"
-    
+
     if not os.path.isfile(full_file_path):
         print(f'Error: File not found or is not a regular file: "{file_path}"')
         return f'Error: File not found or is not a regular file: "{file_path}"'
 
-    with open(full_file_path, 'r') as file:
-        content = file.read(MAX_CHARS)    
+    with open(full_file_path, "r") as file:
+        content = file.read(MAX_CHARS)
         print(f"Content of '{file_path}':\n{content}")
         return content
-    
+
+
 def write_file(working_dir, file_path, content):
     """
     Write content to a file in the specified directory.
@@ -131,20 +147,30 @@ def write_file(working_dir, file_path, content):
     abs_working_directory = os.path.abspath(working_dir)
     full_file_path = os.path.join(abs_working_directory, file_path)
 
-    if not os.path.commonpath([abs_working_directory, full_file_path]) == abs_working_directory:
-        print(f'Error: Cannot write "{file_path}" as it is outside the permitted working directory')
+    if (
+        not os.path.commonpath([abs_working_directory, full_file_path])
+        == abs_working_directory
+    ):
+        print(
+            f'Error: Cannot write "{file_path}" as it is outside the permitted working directory'
+        )
         return f'Error: Cannot write "{file_path}" as it is outside the permitted working directory'
-    
+
     if not os.path.exists(abs_working_directory):
         os.makedirs(abs_working_directory)
-        
+
     try:
-        with open(full_file_path, 'w') as file:
+        with open(full_file_path, "w") as file:
             file.write(content)
-        print( f'Successfully wrote to "{file_path}" ({len(content)} characters written)')
-        return f'Successfully wrote to "{file_path}" ({len(content)} characters written)'
+        print(
+            f'Successfully wrote to "{file_path}" ({len(content)} characters written)'
+        )
+        return (
+            f'Successfully wrote to "{file_path}" ({len(content)} characters written)'
+        )
     except Exception as e:
         return f"Error writing to file '{file_path}': {e}"
+
 
 def run_python_file(working_dir, file_path):
     """
@@ -165,24 +191,131 @@ def run_python_file(working_dir, file_path):
 
     # Restrict to files directly inside working_dir (not subdirectories)
     if os.path.dirname(os.path.abspath(full_file_path)) != abs_working_directory:
-        print(f'Error: Cannot execute "{file_path}" as it is outside the permitted working directory')
+        print(
+            f'Error: Cannot execute "{file_path}" as it is outside the permitted working directory'
+        )
         return f'Error: Cannot execute "{file_path}" as it is outside the permitted working directory'
 
     if not os.path.exists(full_file_path):
         print(f'Error: File "{file_path}" not found.')
         return 'Error: File "{file_path}" not found.'
-    
-    if not full_file_path.endswith('.py'):
+
+    if not full_file_path.endswith(".py"):
         print(f'Error: "{file_path}" is not a Python file')
         return f'Error: "{file_path}" is not a Python file'
 
     try:
-        result = subprocess.run(['python', full_file_path], capture_output=True, text=True, check=True)
+        result = subprocess.run(
+            ["python", full_file_path], capture_output=True, text=True, check=True
+        )
         print(f"STDOUT: of '{file_path}':\n{result.stdout}")
         if result.returncode != 0:
-           print(f"Process exited with code {result.returncode}")
+            print(f"Process exited with code {result.returncode}")
         return result.stdout
     except subprocess.CalledProcessError as e:
         print(f"STDERR: Error running '{file_path}': {e.stderr}")
         print(f"Error: executing Python file: {e}")
         return f"Error running '{file_path}': {e.stderr}"
+
+
+def functionDeclarations():
+    """
+    Returns a list of function declarations for the available functions.
+    Each function declaration includes the name, description, and parameters.
+    This is used to define the functions that can be called by the AI model.
+    """
+    from google.genai import types
+
+    schema_get_files_info = types.FunctionDeclaration(
+        name="get_files_info",
+        description="Lists files in the specified directory along with their sizes, constrained to the working directory.",
+        parameters=types.Schema(
+            type=types.Type.OBJECT,
+            properties={
+                "working_dir": types.Schema(
+                    type=types.Type.STRING,
+                    description="The directory to list files from, relative to the working directory. If not provided, lists files in the working directory itself.",
+                ),
+                "dir": types.Schema(
+                    type=types.Type.STRING,
+                    description="The subdirectory to list files from, relative to the working directory. If not provided, lists files in the working directory itself.",
+                ),
+            },
+        ),
+    )
+    
+    schema_print_files_info = types.FunctionDeclaration(
+        name="print_file_info",
+        description="Prints information about files in the specified directory.",
+        parameters=types.Schema(
+            type=types.Type.OBJECT,
+            properties={
+                "directory_path": types.Schema(
+                    type=types.Type.STRING,
+                    description="The path of the directory to list files from.",
+                ),
+            },
+        ),
+    )
+    
+    schema_get_file_content = types.FunctionDeclaration(
+        name="get_file_content",
+        description="Retrieves the content of a file in the specified directory.",
+        parameters=types.Schema(
+            type=types.Type.OBJECT,
+            properties={
+                "working_dir": types.Schema(
+                    type=types.Type.STRING,
+                    description="The directory to search for the file, relative to the working directory.",
+                ),
+                "file_path": types.Schema(
+                    type=types.Type.STRING,
+                    description="The path of the file to retrieve content from, relative to the working directory.",
+                ),
+            },
+        ),
+    )
+    
+    schema_write_file = types.FunctionDeclaration(
+        name="write_file",
+        description="Writes content to a file in the specified directory.",
+        parameters=types.Schema(
+            type=types.Type.OBJECT,
+            properties={
+                "working_dir": types.Schema(
+                    type=types.Type.STRING,
+                    description="The directory to write the file in, relative to the working directory.",
+                ),
+                "file_path": types.Schema(
+                    type=types.Type.STRING,
+                    description="The path of the file to write, relative to the working directory.",
+                ),
+                "content": types.Schema(
+                    type=types.Type.STRING,
+                    description="The content to write to the file.",
+                ),
+            },
+        ),
+    )
+    
+    schema_run_python_file = types.FunctionDeclaration(
+        name="run_python_file",
+        description="Runs a Python file in the specified directory.",
+        parameters=types.Schema(
+            type=types.Type.OBJECT,
+            properties={
+                "working_dir": types.Schema(
+                    type=types.Type.STRING,
+                    description="The directory to run the Python file in, relative to the working directory.",
+                ),
+                "file_path": types.Schema(
+                    type=types.Type.STRING,
+                    description="The path of the Python file to run, relative to the working directory.",
+                ),
+            },
+        ),
+    )
+    
+    functionDeclarations = [schema_get_files_info, schema_print_files_info, schema_get_file_content, schema_write_file, schema_run_python_file]
+
+    return functionDeclarations

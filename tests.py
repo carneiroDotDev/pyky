@@ -19,7 +19,8 @@ from functions.get_files_info import run_python_file
 # write_file("calculator", "pkg/morelorem.txt", "lorem ipsum dolor sit amet")
 # write_file("calculator", "/tmp/temp.txt", "this should not be allowed")
 
-run_python_file("calculator", "main.py")
-run_python_file("calculator", "tests.py")
-run_python_file("calculator", "../main.py")
-run_python_file("calculator", "nonexistent.py")
+# run_python_file("calculator", "main.py")
+# run_python_file("calculator", "tests.py")
+# run_python_file("calculator", "../main.py")
+# run_python_file("calculator", "nonexistent.py")
+
