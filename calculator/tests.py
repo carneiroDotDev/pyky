@@ -10,10 +10,12 @@ class TestCalculator(unittest.TestCase):
         self.calculator = Calculator()
 
     def test_addition(self):
+        print("Testing addition...")
         result = self.calculator.evaluate("3 + 5")
         self.assertEqual(result, 8)
 
     def test_subtraction(self):
+        print("Testing subtraction...")
         result = self.calculator.evaluate("10 - 4")
         self.assertEqual(result, 6)
 
@@ -44,7 +46,7 @@ class TestCalculator(unittest.TestCase):
     def test_not_enough_operands(self):
         with self.assertRaises(ValueError):
             self.calculator.evaluate("+ 3")
-
+        print("Ran 9 tests")
 
 if __name__ == "__main__":
     unittest.main()

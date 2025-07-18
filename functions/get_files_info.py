@@ -1,4 +1,4 @@
-def print_file_info(directory_path):
+def print_file_info(working_dir):
     """
     Prints information (file size, whether it's a directory) for each
     file and directory within the given path, formatted as requested.
@@ -6,15 +6,16 @@ def print_file_info(directory_path):
     """
     import os
 
-    if not os.path.exists(directory_path):
+    if not os.path.exists(working_dir):
         raise FileNotFoundError(
-            f"Error: The directory '{directory_path}' does not exist."
+            f"Error: The directory '{working_dir}' does not exist."
         )
+    resultString = f"Files in '{working_dir}':\n"
     try:
         # Get a list of all entries (files and directories) in the specified path
-        for entry_name in os.listdir(directory_path):
+        for entry_name in os.listdir(working_dir):
             # Construct the full path to the entry
-            full_path = os.path.join(directory_path, entry_name)
+            full_path = os.path.join(working_dir, entry_name)
 
             is_directory = os.path.isdir(full_path)
             file_size = (
@@ -32,10 +33,12 @@ def print_file_info(directory_path):
 
             # Print the formatted string
             print(f"- {entry_name}: file_size={file_size} bytes, is_dir={is_directory}")
+            resultString += f"- {entry_name}: file_size={file_size} bytes, is_dir={is_directory}"
+        return resultString
 
     except OSError as e:
         # Catch any OS-related errors (e.g., directory not found, permission denied)
-        raise Exception(f"Error: Could not process directory '{directory_path}'. {e}")
+        raise Exception(f"Error: Could not process directory '{working_dir}'. {e}")
     except Exception as e:
         # Catch any other unexpected errors
         raise Exception(f"Error: An unexpected error occurred. {e}")
@@ -57,7 +60,6 @@ def get_files_info(working_dir, dir=None):
     if dir is None:
         dir = working_dir
 
-    files_info = []
     # 1. Normalize and absolute paths
     # Get the absolute, normalized path for the working directory
     abs_working_directory = os.path.abspath(working_dir)
@@ -77,14 +79,14 @@ def get_files_info(working_dir, dir=None):
         )
         return f"Error: Cannot list '{dir}' as it is outside the permitted working directory"
 
-    # 3. Ensure the directory exists
-    if not os.path.exists(os.path.join(abs_working_directory, dir)):
-        print(f"Error: '{dir}' is not a directory")
-        return f"Error: '{dir}' is not a directory"
+    # # 3. Ensure the directory exists
+    # if not os.path.exists(os.path.join(abs_working_directory, dir)):
+    #     print(f"Error: '{dir}' is not a directory")
+    #     return f"Error: '{dir}' is not a directory"
 
-    print_file_info(os.path.join(abs_working_directory, dir))
+    # print_file_info(os.path.join(abs_working_directory, dir))
 
-    return files_info
+    return print_file_info(os.path.join(abs_working_directory, dir))
 
 
 # get_files_info("calculator", ".")
@@ -319,3 +321,61 @@ def functionDeclarations():
     functionDeclarations = [schema_get_files_info, schema_print_files_info, schema_get_file_content, schema_write_file, schema_run_python_file]
 
     return functionDeclarations
+
+def call_function(function_call, verbose=False):
+    """
+    Calls the specified function with the provided arguments.
+    This function is used to execute the function calls made by the AI model.
+    """
+    from google.genai import types
+
+    if verbose:
+        print(f"Calling function: {function_call.name} with arguments: {function_call.args}")
+    else:
+        print(f"Calling function: {function_call.name}")
+    
+    workingDirectory= "./calculator"  # Default working directory
+    
+    dict_functionName = {
+        "get_files_info": get_files_info,
+        "print_file_info": print_file_info,
+        "get_file_content": get_file_content,
+        "write_file": write_file,
+        "run_python_file": run_python_file,
+    }
+    
+    if function_call.name not in dict_functionName:
+        return types.Content(
+            role="tool",
+            parts=[
+                types.Part.from_function_response(
+                    name=function_call.name,
+                    response={"error": f"Unknown function: {function_call.name}"},
+                )
+            ],
+        )
+    
+    if function_call.name == "get_files_info":
+        # Ensure working_dir is provided in args, otherwise use default
+        if "working_dir" not in function_call.args:
+            function_call.args["working_dir"] = workingDirectory
+        return types.Content(
+            role="tool",
+            parts=[
+                types.Part.from_function_response(
+                    name=function_call.name,
+                    response={"result": dict_functionName[function_call.name](**function_call.args)},
+                )
+            ],
+        )
+        
+    return types.Content(
+                role="tool",
+                parts=[
+                    types.Part.from_function_response(
+                        name=function_call.name,
+                        response={"result": dict_functionName[function_call.name](**function_call.args, working_dir=workingDirectory) if "working_dir" not in function_call.args else dict_functionName[function_call.name](**function_call.args)},
+                    )
+                ],
+            )
+    

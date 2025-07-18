@@ -3,6 +3,7 @@ import sys
 from dotenv import load_dotenv
 from google import genai
 from functions.get_files_info import functionDeclarations
+from functions.get_files_info import call_function
 
 
 def main():
@@ -45,9 +46,25 @@ def main():
     )
     # print(f"response obj: {response}")
     print(f"response: {response.text}")
-    print(f"Calling function: {response.function_calls}({response.function_calls})")
+    print(f"Functions to be called: {response.function_calls}")
+    print(f"Functions to be called length: {len(response.function_calls)}")
+    
+    if len(response.function_calls) > 0:
+        print("Function calls:")
+        for function_call_part in response.function_calls:
+            if len(sys.argv) > 2 and sys.argv[2] == "--verbose":
+                functionCallResult = call_function(function_call=function_call_part, verbose=True)
+            else:
+                functionCallResult = call_function(function_call=function_call_part)
+    else:
+        print("***No function calls made***")
+    
+    if not functionCallResult.parts[0].function_response.response:
+        raise Exception("Error: Function call did not return a response.")
+    else:
+        print("Function call response:", functionCallResult.parts[0].function_response.response)
 
-    if len(sys.argv) > 2 and sys.argv[2] == "--verbose":
+    if len(sys.argv) > 2 and sys.argv[2] == "--verbose" and response.usage_metadata:
         print("User prompt: ", sys.argv[1])
         print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
         print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
