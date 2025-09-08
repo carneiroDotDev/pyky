@@ -27,5 +27,11 @@
         "titleBar.inactiveBackground": "#80808099",
         "titleBar.inactiveForeground": "#15202b99"
     },
-    "peacock.color": "gray"
+    "peacock.color": "gray",
+    "cursorpyright.analysis.autoSearchPaths": true,
+    "cursorpyright.analysis.diagnosticSeverityOverrides": {
+        "reportUntypedFunctionDecorator": "none"
+    },
+    "cursorpyright.analysis.typeCheckingMode": "basic",
+    "cursorpyright.analysis.useLibraryCodeForTypes": true
 }
